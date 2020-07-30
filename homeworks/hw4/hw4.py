@@ -101,5 +101,6 @@ trump.sellShares(google, 1)
 trump.buyShares(apple, 10)
 trump.buyShares(facebook, 50)
 biden.buyShares(google, 10)
+trump.sellShares(facebook, 20)
 
 # Challenge Problem: Write your own test cases!
