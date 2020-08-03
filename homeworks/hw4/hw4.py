@@ -2,9 +2,9 @@
 
 # Company
 class Company:
-    name = 'Google'
-    available_shares = 250000
-    share_price = 100
+    name = ""
+    available_shares = 0
+    share_price = 0
 
     def __init__(self, name, shares, price):
         self.name = name
@@ -28,13 +28,14 @@ class Company:
 
 # Trader class
 class Trader:
-    name = "Joe"
-    budget = 1000
-    shares = {}
+    name = ""
+    budget = 0
+    shares = -1
 
     def __init__(self, name, available_budget):
         self.name = name
         self.budget = available_budget
+        self.shares = {}
 
     def getName(self):
         return self.name
@@ -65,7 +66,21 @@ class Trader:
     def sellShares(self, company, amount):
     # The opposite of buyShares, but this time the trader wants to sell shares BACK to the company
     # You need to check if the trader has the number of shares that they want to sell back!
-        pass
+        if company.getName() not in self.shares.keys() or self.shares[company.getName()] < amount:
+            print("Not enough shares to sell")
+        else:
+            self.shares[company.getName()] -= amount
+            self.budget += amount * company.getSharePrice()
+            company.setShares(company.getAvailableShares() + amount)
+            print(amount)
+
+    # For the tradeShares method, we'll need these get/set methods
+    def getShares(self):
+        return self.shares
+
+    # This one sets EDITS a k/v pair in self.shares
+    def setShares(self, k, v):
+        self.shares[k] = v
 
     def tradeShares(self, otherTrader, thisCompany, thisShares, otherCompany, otherShares):
     # This should only be possible if the prices for each set of shares is the same!
@@ -76,8 +91,24 @@ class Trader:
     # Bob now has 10 shares of Apple and 5 shares of Google
     # j.tradeShares(b, a, 10, g, 10) is NOT valid because 10 shares of Apple
     # and 10 shares of Google are NOT the same price!
-        pass
 
+        # We'll begin with some checks
+        this_company_exists = thisCompany.getName() in self.shares.keys()
+        other_company_exists = otherCompany.getName() in otherTrader.getShares().keys()
+        this_enough_shares = self.shares[thisCompany.getName()] >= thisShares
+        other_enough_shares = otherTrader.getShares()[otherCompany.getName()] >= otherShares
+        price_equivalent = thisCompany.getSharePrice() * thisShares == otherCompany.getSharePrice() * otherShares
+
+        # If everything is valid
+        if this_company_exists and other_company_exists and this_enough_shares and other_enough_shares and price_equivalent:
+            self.shares[thisCompany.getName()] -= thisShares
+            otherTrader.setShares(otherCompany.getName(), (otherTrader.getShares()[otherCompany.getName()]) - otherShares)
+            self.shares[otherCompany.getName()] = self.shares.get(otherCompany.getName(), 0) + otherShares
+            otherTrader.setShares(thisCompany.getName(), otherTrader.getShares().get(thisCompany.getName(), 0) + thisShares)
+            print("Trade Successful!")
+        # Somthing is invalid
+        else:
+            print("Invalid Request")
 
 # Sample:
 
@@ -103,4 +134,9 @@ trump.buyShares(facebook, 50)
 biden.buyShares(google, 10)
 trump.sellShares(facebook, 20)
 
-# Challenge Problem: Write your own test cases!
+# Challenge Problem
+sanders.buyShares(apple, 20)
+sanders.buyShares(amazon, 1)
+yang.buyShares(amazon, 2)
+sanders.tradeShares(yang, apple, 21, amazon, 1) # Invalid
+sanders.tradeShares(yang, apple, 20, amazon, 1) # Valid
